@@ -1,4 +1,4 @@
-Practiing PySpark: Building a recommender system by implementing ALS collaborative filtering.
+Practicing PySpark: Building a recommender system by implementing ALS collaborative filtering.
 
 Key library in use:
 PySpark
