@@ -103,12 +103,24 @@ alsModel.recommendForAllItems(10)\
 # ### select test user
 
 # +
-test_user_id = 8
+test_user_id = 78
 
 test_user = ratings.filter(ratings['user_id'] == test_user_id)
+
 joinExpression = test_user["book_id"] == book_names['book_id']
-test_user.join(book_names, joinExpression, joinType)\
- .orderBy('rating', ascending = False).show(truncate = False)
+joinType = 'left'
+
+test_user_profile = test_user.join(book_names, joinExpression, joinType)\
+ .orderBy('rating', ascending = False)
+
+test_user_profile.show(truncate = False)
+
+# +
+unique_books = books.select("title").distinct()
+
+
+books_read = test_user_profile.select("title").distinct()
+
 # -
 
 # ### filter for results and join with book names
@@ -120,11 +132,15 @@ test_userRecs = userRecs.filter(userRecs['user_id'] == test_user_id)\
                     .selectExpr("user_id", "explode(recommendations)")
 
 test_userRecs = test_userRecs.select("user_id", 'col.*')
-# -
 
+# +
 joinExpression = test_userRecs["book_id"] == book_names['book_id']
 joinType = "inner"
-test_userRecs.join(book_names, joinExpression, joinType).show(truncate = False)
+
+recommended_books = test_userRecs.join(book_names, joinExpression, joinType)
+
+recommended_books.select("title", "rating").show(truncate = False)
+# -
 
 
 
