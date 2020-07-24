@@ -51,6 +51,12 @@ books.createOrReplaceTempView("dfTable")
 book_names = books.select("book_id", "title", "authors")
 book_names.show(5)
 
+ratings.groupby("book_id").count().orderBy("count", ascending=False).show(10,False)
+
+# ### if you don't have a indexed book_id, use StringIndexer to change into indexes
+
+
+
 # # Build Model and Fit
 
 # +
@@ -71,6 +77,10 @@ als = ALS()\
 alsModel = als.fit(training)
 predictions = alsModel.transform(test)
 
+# ALS effectively predicted the ratings that a user would give for a particular book
+
+predictions.show(10)
+
 # # Evaluate
 
 # When covering the cold-start strategy, we can set up an automatic model evaluator when working with ALS. One thing that may not be immediately obvious is that this recommendation problem is really just a kind of regression problem. Since we’re predicting values (ratings) for given users, we want to optimize for reducing the total difference between our users’ ratings and the true values. We can do this using the RegressionEvaluator.
@@ -78,11 +88,13 @@ predictions = alsModel.transform(test)
 # in Python
 from pyspark.ml.evaluation import RegressionEvaluator
 evaluator = RegressionEvaluator()\
-  .setMetricName("rmse")\
-  .setLabelCol("rating")\
-  .setPredictionCol("prediction")
+              .setMetricName("rmse")\
+              .setLabelCol("rating")\
+              .setPredictionCol("prediction")
 rmse = evaluator.evaluate(predictions)
 print("Root-mean-square error = %f" % rmse)
+
+# This error isn't the best! The model can be improvied further by tuning the hyperparameters
 
 # # Recommendation Results
 
