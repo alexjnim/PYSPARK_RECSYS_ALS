@@ -35,7 +35,7 @@ spark = SparkSession\
 ratings = spark.read.format("csv")\
   .option("header", "true")\
   .option("inferSchema", "true")\
-  .load("../data/goodbooks-10k-master/ratings.csv")
+  .load("data/goodbooks-10k-master/ratings.csv")
 ratings.printSchema()
 ratings.createOrReplaceTempView("dfTable")
 
@@ -44,7 +44,7 @@ ratings.show(3)
 books = spark.read.format("csv")\
   .option("header", "true")\
   .option("inferSchema", "true")\
-  .load("../data/goodbooks-10k-master/books.csv")
+  .load("data/goodbooks-10k-master/books.csv")
 books.printSchema()
 books.createOrReplaceTempView("dfTable")
 
@@ -95,6 +95,45 @@ rmse = evaluator.evaluate(predictions)
 print("Root-mean-square error = %f" % rmse)
 
 # This error isn't the best! The model can be improvied further by tuning the hyperparameters
+
+# # Cross-Val and Param-Grid
+
+# +
+from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+
+parameter_grid = (
+    ParamGridBuilder()
+    .addGrid(als.rank, [1, 5, 10])
+    .addGrid(als.maxIter, [20])
+    .addGrid(als.regParam, [0.05, 0.1])
+    .build()
+)
+
+# +
+from pprint import pprint
+
+pprint(parameter_grid)
+
+# +
+crossvalidator = CrossValidator(
+    estimator=als,
+    estimatorParamMaps=parameter_grid,
+    evaluator=evaluator,
+    numFolds=2
+)
+
+crossval_model = crossvalidator.fit(training)
+predictions = crossval_model.transform(test)
+# -
+
+rmse = evaluator.evaluate(predictions)
+print("Root-mean-square error = %f" % rmse)
+
+# some improvement! 
+
+model = crossval_model.bestModel
+
+
 
 # # Recommendation Results
 
