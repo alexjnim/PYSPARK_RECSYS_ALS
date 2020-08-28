@@ -123,17 +123,14 @@ crossvalidator = CrossValidator(
 )
 
 crossval_model = crossvalidator.fit(training)
-predictions = crossval_model.transform(test)
+model = crossval_model.bestModel
+predictions = model.transform(test)
 # -
 
 rmse = evaluator.evaluate(predictions)
 print("Root-mean-square error = %f" % rmse)
 
 # some improvement! 
-
-model = crossval_model.bestModel
-
-
 
 # # Recommendation Results
 
